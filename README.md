@@ -9,7 +9,7 @@ A clean, modern payment integration demo showcasing Paystack checkout flow with 
 
 ## 🌐 Live Demo
 
-**[payflow-demo.netlify.app](https://payflow-demo.netlify.app)** ← Try it with test card!
+**[payflow-demo.netlify.app](https://majestic-granita-d17a1e.netlify.app)** ← Try it with test card!
 
 Test Card: `4084 0840 8408 4081` | Expiry: `01/30` | CVV: `408`
 
@@ -17,7 +17,15 @@ Test Card: `4084 0840 8408 4081` | Expiry: `01/30` | CVV: `408`
 
 ## 📸 Screenshots
 
-<!-- Screenshots will be added here -->
+### Landing Page & Pricing
+| Landing Page | Pricing Plans |
+|:---:|:---:|
+| ![Landing](https://github.com/user-attachments/assets/a6b3ce2d-a2df-40c9-9639-b5f94eae7240) | ![Pricing](https://github.com/user-attachments/assets/6567efcc-f514-4653-9645-41957b7a6f44) |
+
+### Checkout & Payment Success
+| Checkout Page | Payment Success |
+|:---:|:---:|
+| ![Checkout](https://github.com/user-attachments/assets/6c5ab3dd-a710-44c0-9200-f5f388833c7e) | ![Success](https://github.com/user-attachments/assets/55b07866-eaaf-4c65-9cb0-00d99badfe87) |
 
 ---
 
@@ -112,3 +120,4 @@ MIT License
 - 💬 Telegram: [@DUAL_XXE](https://t.me/DUAL_XXE)
 - 📧 Email: dualization01@gmail.com
 - 💻 GitHub: [Dual-xxe](https://github.com/Dual-xxe)
+- 
