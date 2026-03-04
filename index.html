@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayFlow — Payment Integration Demo</title>
+    <script src="https://js.paystack.co/v2/inline.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #0066ff;
+            --primary-dark: #0052cc;
+            --secondary: #00c853;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ============ NAVIGATION ============ */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .logo span { color: var(--dark); }
+        nav a {
+            color: var(--dark);
+            text-decoration: none;
+            margin-left: 24px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        nav a:hover { color: var(--primary); }
+        .nav-links { display: flex; align-items: center; gap: 8px; }
+
+        /* ============ HERO SECTION ============ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 100px 24px 60px;
+        }
+        .hero h1 {
+            font-size: clamp(32px, 6vw, 56px);
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        .hero p {
+            font-size: clamp(16px, 3vw, 20px);
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+        .hero-badges {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        .hero-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn {
+            display: inline-block;
+            padding: 14px 36px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-white {
+            background: white;
+            color: var(--primary);
+        }
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,102,255,0.3);
+        }
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* ============ GATEWAYS SECTION ============ */
+        .gateways {
+            padding: 80px 24px;
+            text-align: center;
+            background: var(--white);
+        }
+        .section-title {
+            font-size: clamp(24px, 4vw, 36px);
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .section-subtitle {
+            color: var(--gray);
+            font-size: 16px;
+            margin-bottom: 48px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .gateway-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .gateway-card {
+            background: var(--light);
+            padding: 32px 24px;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .gateway-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+        }
+        .gateway-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .gateway-card h3 { font-size: 18px; margin-bottom: 8px; }
+        .gateway-card p { font-size: 14px; color: var(--gray); }
+
+        /* ============ FEATURES SECTION ============ */
+        .features {
+            padding: 80px 24px;
+            background: var(--dark);
+            color: white;
+        }
+        .features .section-title { color: white; }
+        .features .section-subtitle { color: rgba(255,255,255,0.6); }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .feature-card {
+            background: var(--darker);
+            padding: 32px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .feature-emoji { font-size: 36px; margin-bottom: 16px; }
+        .feature-card h3 { margin-bottom: 8px; font-size: 18px; }
+        .feature-card p { color: rgba(255,255,255,0.6); font-size: 14px; }
+
+        /* ============ PRICING SECTION ============ */
+        .pricing {
+            padding: 80px 24px;
+            background: var(--light);
+            text-align: center;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .price-card {
+            background: white;
+            padding: 40px 32px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            position: relative;
+            border: 2px solid transparent;
+        }
+        .price-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .price-card.popular {
+            border-color: var(--primary);
+        }
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 4px 20px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .price-card h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        .price-amount {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 16px 0;
+        }
+        .price-amount span {
+            font-size: 16px;
+            color: var(--gray);
+            font-weight: 400;
+        }
+        .price-features {
+            list-style: none;
+            margin: 24px 0;
+            text-align: left;
+        }
+        .price-features li {
+            padding: 8px 0;
+            font-size: 14px;
+            color: var(--gray);
+        }
+        .price-features li::before {
+            content: '✅ ';
+        }
+        .price-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        /* ============ CHECKOUT SECTION ============ */
+        .checkout {
+            padding: 80px 24px;
+            background: white;
+            text-align: center;
+        }
+        .checkout-box {
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--light);
+            padding: 40px 32px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .checkout-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 15px;
+        }
+        .checkout-item:last-child { border-bottom: none; }
+        .checkout-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 0;
+            font-size: 20px;
+            font-weight: 800;
+            border-top: 2px solid var(--dark);
+            margin-top: 12px;
+        }
+        .checkout-btn {
+            width: 100%;
+            padding: 16px;
+            margin-top: 24px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .checkout-btn:hover {
+            background: #00a844;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,200,83,0.3);
+        }
+        .secure-badge {
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        /* ============ SUCCESS SECTION ============ */
+        .success-section {
+            padding: 80px 24px;
+            text-align: center;
+            background: var(--light);
+            display: none;
+        }
+        .success-box {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 48px 32px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .success-check {
+            width: 80px;
+            height: 80px;
+            background: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 40px;
+        }
+        .success-box h2 { color: var(--secondary); margin-bottom: 12px; }
+        .receipt {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 24px 0;
+            text-align: left;
+        }
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+        .receipt-row.total {
+            font-weight: 800;
+            border-top: 1px solid #ddd;
+            padding-top: 12px;
+            margin-top: 4px;
+        }
+
+        /* ============ TRANSACTION LOG ============ */
+        .transactions {
+            padding: 80px 24px;
+            background: var(--dark);
+            color: white;
+        }
+        .transactions .section-title { color: white; }
+        .transactions .section-subtitle { color: rgba(255,255,255,0.6); }
+        .tx-table {
+            max-width: 900px;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+        .tx-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .tx-table th {
+            background: var(--darker);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+        }
+        .tx-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .status-success {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        /* ============ CODE SECTION ============ */
+        .code-section {
+            padding: 80px 24px;
+            background: var(--light);
+        }
+        .code-block {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--dark);
+            color: #e0e0e0;
+            padding: 32px;
+            border-radius: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+        .code-keyword { color: #c792ea; }
+        .code-string { color: #c3e88d; }
+        .code-comment { color: #546e7a; }
+        .code-func { color: #82aaff; }
+
+        /* ============ FOOTER ============ */
+        footer {
+            background: var(--darker);
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            padding: 40px 24px;
+        }
+        footer a { color: var(--primary); text-decoration: none; }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 768px) {
+            .nav-links a:not(:last-child) { display: none; }
+            .pricing-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ============ ANIMATIONS ============ */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Page selector */
+        .page { display: none; }
+        .page.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <div class="logo">Pay<span>Flow</span></div>
+        <div class="nav-links">
+            <a href="#" onclick="showPage('home')">Home</a>
+            <a href="#" onclick="showPage('pricing')">Pricing</a>
+            <a href="#" onclick="showPage('checkout')">Checkout</a>
+            <a href="https://github.com/Dual-xxe/payflow-demo" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <!-- ============ HOME PAGE ============ -->
+    <div id="page-home" class="page active">
+        <!-- Hero -->
+        <section class="hero">
+            <div>
+                <div class="hero-badges">
+                    <span class="hero-badge">💳 Paystack</span>
+                    <span class="hero-badge">⚡ Stripe</span>
+                    <span class="hero-badge">🌊 Flutterwave</span>
+                </div>
+                <h1>Payment Integration<br>Made Simple</h1>
+                <p>A demo showcasing seamless payment gateway integration with Paystack. Real checkout flow, webhook verification, and transaction management.</p>
+                <a href="#" class="btn btn-white" onclick="showPage('pricing')">View Pricing Demo →</a>
+            </div>
+        </section>
+
+        <!-- Gateways -->
+        <section class="gateways fade-in">
+            <h2 class="section-title">Payment Gateways</h2>
+            <p class="section-subtitle">Integration expertise across multiple payment providers</p>
+            <div class="gateway-grid">
+                <div class="gateway-card">
+                    <div class="gateway-icon">💚</div>
+                    <h3>Paystack</h3>
+                    <p>Africa's leading payment gateway. Cards, bank transfers, USSD, mobile money.</p>
+                </div>
+                <div class="gateway-card">
+                    <div class="gateway-icon">💜</div>
+                    <h3>Stripe</h3>
+                    <p>Global payment processing. Cards, wallets, subscriptions, invoicing.</p>
+                </div>
+                <div class="gateway-card">
+                    <div class="gateway-icon">🧡</div>
+                    <h3>Flutterwave</h3>
+                    <p>Pan-African payments. Cards, bank transfers, mobile money, Barter.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="features fade-in">
+            <h2 class="section-title">Integration Features</h2>
+            <p class="section-subtitle">Production-ready payment implementation</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-emoji">🔒</div>
+                    <h3>Secure Checkout</h3>
+                    <p>PCI-compliant payment processing with encrypted card data handling and tokenization.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-emoji">📨</div>
+                    <h3>Webhook Verification</h3>
+                    <p>SHA-512 HMAC signature verification on all incoming webhooks for tamper-proof transactions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-emoji">🔄</div>
+                    <h3>Subscription Billing</h3>
+                    <p>Recurring payment plans with automatic renewal, cancellation, and plan switching.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-emoji">📊</div>
+                    <h3>Transaction Dashboard</h3>
+                    <p>Real-time transaction monitoring with status tracking, analytics, and reporting.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-emoji">💱</div>
+                    <h3>Multi-Currency</h3>
+                    <p>Support for NGN, USD, GHS, KES, ZAR and other currencies across Africa.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-emoji">⚡</div>
+                    <h3>Instant Notifications</h3>
+                    <p>Real-time payment confirmations via email, SMS, Telegram, and in-app notifications.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Code Sample -->
+        <section class="code-section fade-in">
+            <h2 class="section-title" style="text-align:center;">Clean Integration Code</h2>
+            <p class="section-subtitle" style="text-align:center;">Simple, readable, production-ready</p>
+            <div class="code-block">
+                <span class="code-comment">// Initialize Paystack Payment</span><br>
+                <span class="code-keyword">const</span> <span class="code-func">initializePayment</span> = <span class="code-keyword">async</span> (email, amount) => {<br>
+                &nbsp;&nbsp;<span class="code-keyword">const</span> response = <span class="code-keyword">await</span> axios.<span class="code-func">post</span>(<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">'https://api.paystack.co/transaction/initialize'</span>,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;{ email, amount: amount * <span style="color:#f78c6c">100</span> },<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;{ headers: { Authorization: <span class="code-string">`Bearer ${SECRET_KEY}`</span> }}<br>
+                &nbsp;&nbsp;);<br>
+                &nbsp;&nbsp;<span class="code-keyword">return</span> response.data.data.authorization_url;<br>
+                };<br><br>
+                <span class="code-comment">// Verify Webhook Signature</span><br>
+                <span class="code-keyword">const</span> hash = crypto.<span class="code-func">createHmac</span>(<span class="code-string">'sha512'</span>, SECRET_KEY)<br>
+                &nbsp;&nbsp;.<span class="code-func">update</span>(JSON.<span class="code-func">stringify</span>(req.body)).<span class="code-func">digest</span>(<span class="code-string">'hex'</span>);<br>
+            </div>
+        </section>
+    </div>
+
+    <!-- ============ PRICING PAGE ============ -->
+    <div id="page-pricing" class="page">
+        <section class="pricing" style="padding-top: 120px;">
+            <h2 class="section-title">Choose Your Plan</h2>
+            <p class="section-subtitle">All plans include secure Paystack checkout with test mode</p>
+            <div class="pricing-grid">
+                <!-- Basic -->
+                <div class="price-card">
+                    <h3>📦 Basic</h3>
+                    <p style="color: var(--gray);">For individuals</p>
+                    <div class="price-amount">₦1,000<span>/week</span></div>
+                    <ul class="price-features">
+                        <li>Access to basic content</li>
+                        <li>7 days duration</li>
+                        <li>Email support</li>
+                        <li>Basic analytics</li>
+                    </ul>
+                    <button class="price-btn btn-primary" onclick="selectPlan('basic', 1000)">
+                        Select Basic
+                    </button>
+                </div>
+
+                <!-- Pro -->
+                <div class="price-card popular">
+                    <span class="popular-badge">⭐ MOST POPULAR</span>
+                    <h3>⭐ Pro</h3>
+                    <p style="color: var(--gray);">For professionals</p>
+                    <div class="price-amount">₦2,500<span>/month</span></div>
+                    <ul class="price-features">
+                        <li>Access to ALL content</li>
+                        <li>30 days duration</li>
+                        <li>Priority support</li>
+                        <li>Advanced analytics</li>
+                        <li>Exclusive updates</li>
+                    </ul>
+                    <button class="price-btn btn-primary" onclick="selectPlan('pro', 2500)">
+                        Select Pro
+                    </button>
+                </div>
+
+                <!-- Premium -->
+                <div class="price-card">
+                    <h3>👑 Premium</h3>
+                    <p style="color: var(--gray);">For enterprises</p>
+                    <div class="price-amount">₦5,000<span>/quarter</span></div>
+                    <ul class="price-features">
+                        <li>Access to ALL content</li>
+                        <li>90 days duration</li>
+                        <li>VIP support</li>
+                        <li>Full analytics suite</li>
+                        <li>1-on-1 consultation</li>
+                        <li>Early feature access</li>
+                    </ul>
+                    <button class="price-btn btn-primary" onclick="selectPlan('premium', 5000)">
+                        Select Premium
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ============ CHECKOUT PAGE ============ -->
+    <div id="page-checkout" class="page">
+        <section class="checkout" style="padding-top: 120px;">
+            <h2 class="section-title">Checkout</h2>
+            <p class="section-subtitle">Complete your purchase with Paystack secure checkout</p>
+            <div class="checkout-box">
+                <div style="text-align: left; margin-bottom: 24px;">
+                    <label style="font-weight: 600; font-size: 14px;">Email Address</label>
+                    <input type="email" id="checkout-email" placeholder="your@email.com" 
+                        value="dualization01@gmail.com"
+                        style="width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; margin-top: 8px; font-size: 15px; outline: none;">
+                </div>
+                <div class="checkout-item">
+                    <span>Plan</span>
+                    <span id="checkout-plan" style="font-weight: 600;">⭐ Pro Plan</span>
+                </div>
+                <div class="checkout-item">
+                    <span>Duration</span>
+                    <span id="checkout-duration">30 days</span>
+                </div>
+                <div class="checkout-item">
+                    <span>Subtotal</span>
+                    <span id="checkout-subtotal">₦2,500</span>
+                </div>
+                <div class="checkout-item">
+                    <span>Processing Fee</span>
+                    <span>₦0</span>
+                </div>
+                <div class="checkout-total">
+                    <span>Total</span>
+                    <span id="checkout-total">₦2,500</span>
+                </div>
+                <button class="checkout-btn" onclick="payWithPaystack()">
+                    💳 Pay Now with Paystack
+                </button>
+                <p class="secure-badge">🔒 Secured by Paystack — 256-bit SSL Encryption</p>
+                <p style="margin-top: 12px; font-size: 12px; color: var(--gray);">
+                    ⚠️ This is a TEST MODE demo — no real charges will be made.<br>
+                    Test Card: 4084 0840 8408 4081 | Exp: 01/30 | CVV: 408
+                </p>
+            </div>
+        </section>
+
+        <!-- Transaction Log -->
+        <section class="transactions">
+            <h2 class="section-title">Transaction Log</h2>
+            <p class="section-subtitle">Real-time payment tracking dashboard</p>
+            <div class="tx-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tx-body">
+                        <tr>
+                            <td>SUB_5053_pro_17726...</td>
+                            <td>₦2,500</td>
+                            <td class="status-success">✅ Success</td>
+                            <td>Mar 4, 2026</td>
+                        </tr>
+                        <tr>
+                            <td>SUB_4821_basic_17725...</td>
+                            <td>₦1,000</td>
+                            <td class="status-success">✅ Success</td>
+                            <td>Mar 3, 2026</td>
+                        </tr>
+                        <tr>
+                            <td>SUB_3902_premium_17724...</td>
+                            <td>₦5,000</td>
+                            <td class="status-success">✅ Success</td>
+                            <td>Mar 2, 2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- ============ SUCCESS PAGE ============ -->
+    <div id="page-success" class="page">
+        <section class="checkout" style="padding-top: 120px; min-height: 100vh; background: var(--light);">
+            <div class="success-box">
+                <div class="success-check">✅</div>
+                <h2>Payment Successful!</h2>
+                <p style="color: var(--gray);">Your subscription has been activated</p>
+                <div class="receipt">
+                    <div class="receipt-row">
+                        <span style="color: var(--gray);">Reference</span>
+                        <span id="success-ref" style="font-weight: 600; font-size: 12px;">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span style="color: var(--gray);">Plan</span>
+                        <span id="success-plan" style="font-weight: 600;">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span style="color: var(--gray);">Email</span>
+                        <span id="success-email" style="font-weight: 600;">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span style="color: var(--gray);">Payment Method</span>
+                        <span style="font-weight: 600;">Paystack</span>
+                    </div>
+                    <div class="receipt-row total">
+                        <span>Amount Paid</span>
+                        <span id="success-amount" style="color: var(--secondary);">—</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="showPage('home')" style="width: 100%; padding: 14px;">
+                    ← Back to Home
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p style="margin-bottom: 8px; font-size: 18px; font-weight: 700; color: white;">PayFlow</p>
+        <p>Payment Integration Demo by <a href="https://github.com/Dual-xxe">Ahmad</a></p>
+        <p style="margin-top: 8px;">
+            <a href="https://github.com/Dual-xxe/payflow-demo">GitHub</a> · 
+            <a href="https://numapremiumai.store">Portfolio</a> · 
+            <a href="https://t.me/DUAL_XXE">Telegram</a>
+        </p>
+    </footer>
+
+    <script>
+        // ============ NAVIGATION ============
+        let currentPlan = 'pro';
+        let currentAmount = 2500;
+        const planNames = { basic: '📦 Basic Plan', pro: '⭐ Pro Plan', premium: '👑 Premium Plan' };
+        const planDurations = { basic: '7 days', pro: '30 days', premium: '90 days' };
+
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function selectPlan(plan, amount) {
+            currentPlan = plan;
+            currentAmount = amount;
+            document.getElementById('checkout-plan').textContent = planNames[plan];
+            document.getElementById('checkout-duration').textContent = planDurations[plan];
+            document.getElementById('checkout-subtotal').textContent = '₦' + amount.toLocaleString();
+            document.getElementById('checkout-total').textContent = '₦' + amount.toLocaleString();
+            showPage('checkout');
+        }
+
+        // ============ PAYSTACK PAYMENT ============
+        function payWithPaystack() {
+            const email = document.getElementById('checkout-email').value;
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            const handler = PaystackPop.setup({
+                key: 'pk_test_ab6a57e4c8fd4dfc8073528b6ac4e88833001c11',
+                email: email,
+                amount: currentAmount * 100,
+                currency: 'NGN',
+                ref: 'PF_' + Math.floor(Math.random() * 1000000000),
+                metadata: {
+                    plan: currentPlan,
+                    custom_fields: [
+                        { display_name: 'Plan', variable_name: 'plan', value: currentPlan }
+                    ]
+                },
+                onClose: function() {
+                    console.log('Payment window closed');
+                },
+                callback: function(response) {
+                    // Payment successful
+                    document.getElementById('success-ref').textContent = response.reference;
+                    document.getElementById('success-plan').textContent = planNames[currentPlan];
+                    document.getElementById('success-email').textContent = email;
+                    document.getElementById('success-amount').textContent = '₦' + currentAmount.toLocaleString();
+
+                    // Add to transaction log
+                    const tbody = document.getElementById('tx-body');
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${response.reference.substring(0, 20)}...</td>
+                        <td>₦${currentAmount.toLocaleString()}</td>
+                        <td class="status-success">✅ Success</td>
+                        <td>${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                    `;
+                    tbody.insertBefore(row, tbody.firstChild);
+
+                    showPage('success');
+                }
+            });
+            handler.openIframe();
+        }
+
+        // ============ SCROLL ANIMATIONS ============
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
